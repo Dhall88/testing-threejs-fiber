@@ -1,101 +1,61 @@
-import React, { useRef } from "react";
-import ReactDOM from "react-dom";
-import { Canvas } from "react-three-fiber";
+import React, { Suspense, useRef } from "react";
+import { Canvas, useLoader, useFrame } from "react-three-fiber";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import "./style.css";
 
-import "./styles.css";
-
-// Geometry
-function GroundPlane() {
+function Loading() {
   return (
-    <mesh receiveShadow rotation={[5, 0, 0]} position={[0, -1, 0]}>
-      <planeBufferGeometry attach="geometry" args={[500, 500]} />
-      <meshStandardMaterial attach="material" color="white" />
-    </mesh>
-  );
-}
-function BackDrop() {
-  return (
-    <mesh receiveShadow position={[0, -1, -5]}>
-      <planeBufferGeometry attach="geometry" args={[500, 500]} />
-      <meshStandardMaterial attach="material" color="white" />
-    </mesh>
-  );
-}
-function Sphere() {
-  return (
-    <mesh
-      visible
-      userData={{ test: "hello" }}
-      position={[0, 0, 0]}
-      rotation={[0, 0, 0]}
-      castShadow
-    >
+    <mesh visible position={[0, 0, 0]} rotation={[0, 0, 0]}>
       <sphereGeometry attach="geometry" args={[1, 16, 16]} />
       <meshStandardMaterial
         attach="material"
         color="white"
         transparent
-        roughness={0.1}
-        metalness={0.1}
+        opacity={0.6}
+        roughness={1}
+        metalness={0}
       />
     </mesh>
   );
 }
-// Lights
-function KeyLight({ brightness, color }) {
+
+function ArWing() {
+  const group = useRef();
+  const { nodes } = useLoader(GLTFLoader, "models/arwing.glb");
+  useFrame(() => {
+    group.current.rotation.y += 0.004;
+  });
   return (
-    <rectAreaLight
-      width={3}
-      height={3}
-      color={color}
-      intensity={brightness}
-      position={[-2, 0, 5]}
-      lookAt={[0, 0, 0]}
-      penumbra={1}
-      castShadow
-    />
-  );
-}
-function FillLight({ brightness, color }) {
-  return (
-    <rectAreaLight
-      width={3}
-      height={3}
-      intensity={brightness}
-      color={color}
-      position={[2, 1, 4]}
-      lookAt={[0, 0, 0]}
-      penumbra={2}
-      castShadow
-    />
-  );
-}
-function RimLight({ brightness, color }) {
-  return (
-    <rectAreaLight
-      width={2}
-      height={2}
-      intensity={brightness}
-      color={color}
-      position={[1, 4, -2]}
-      rotation={[0, 180, 0]}
-      castShadow
-    />
+    <group ref={group}>
+      <mesh visible geometry={nodes.Default.geometry}>
+        <meshStandardMaterial
+          attach="material"
+          color="white"
+          roughness={0.3}
+          metalness={0.3}
+        />
+      </mesh>
+    </group>
   );
 }
 
-function App() {
+export default function App() {
   return (
-    <Canvas className="canvas">
-      <GroundPlane />
-      <BackDrop />
-      <KeyLight brightness={5.6} color="#ffbdf4" />
-      <FillLight brightness={2.6} color="#bdefff" />
-      <RimLight brightness={54} color="#fff" />
-      <Sphere />
-    </Canvas>
+    <>
+      <Canvas style={{ background: "#171717" }}>
+        <directionalLight intensity={0.5} />
+        <Suspense fallback={<Loading />}>
+          <ArWing />
+        </Suspense>
+      </Canvas>
+      <a
+        href="https://codeworkshop.dev/blog/2020-03-31-creating-a-3d-spacefox-scene-with-react-three-fiber/"
+        className="blog-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Blog Post
+      </a>
+    </>
   );
 }
-
-const rootElement = document.getElementById("root");
-ReactDOM.render(<App />, rootElement);
