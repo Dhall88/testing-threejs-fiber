@@ -1,6 +1,6 @@
-import React from "react";
+import React, {useRef} from "react";
 import ReactDOM from "react-dom";
-import { applyProps, Canvas } from "react-three-fiber";
+import { Canvas, useLoader, useFrame } from "react-three-fiber";
 
 // import "./style.css";
 
@@ -20,11 +20,13 @@ import { applyProps, Canvas } from "react-three-fiber";
 // }
 
 export default function Block(props) {
-
+    const group = useRef();
+    console.log(group)
     useFrame(() => {
-        group.current.rotation.y += 0.004;
+        group.current.rotation.y -= 0.004;
       });
     return (
+        <group ref={group}>
       <mesh visible position={[props.coords[0],props.coords[1],props.coords[2]]} rotation={[0, 0, 0]} castShadow>
         <boxGeometry attach="geometry" args={[1, 1, 1]} />
         <meshBasicMaterial
@@ -34,5 +36,6 @@ export default function Block(props) {
           metalness={1}
         />
       </mesh>
+      </group>
     );
   }
